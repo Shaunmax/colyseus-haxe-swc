@@ -1,5 +1,7 @@
 package io.colyseus;
 
+import flash.trace.Trace;
+import haxe.Log;
 import haxe.Constraints.Function;
 
 using io.colyseus.events.EventHandler;

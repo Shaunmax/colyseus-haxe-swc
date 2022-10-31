@@ -28,3 +28,4 @@ Player
 # -D dll_export # WINDOWS?
 -D actuate
 #--no-traces
+-D native-trace
