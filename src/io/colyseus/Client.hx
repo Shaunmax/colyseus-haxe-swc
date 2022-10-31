@@ -1,14 +1,7 @@
 package io.colyseus;
 
-import flash.trace.Trace;
-import haxe.Log;
-import haxe.Constraints.Function;
-
 using io.colyseus.events.EventHandler;
 using io.colyseus.error.MatchMakeError;
-
-import haxe.io.Bytes;
-import org.msgpack.MsgPack;
 
 interface RoomAvailable {
     public var roomId: String;
