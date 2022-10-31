@@ -15,7 +15,7 @@ using io.colyseus.events.EventHandler;
 import haxe.io.Bytes;
 import haxe.ds.Map;
 import org.msgpack.MsgPack;
-
+@:keep
 class Room<T> {
     public var id: String;
     public var sessionId: String;
@@ -102,8 +102,9 @@ class Room<T> {
         return this;
     }
 
-    public var state (get, null): T;
-    function get_state () : T {
+    public var _state (get, null): T;
+    @:getter(state)
+    function get__state () : T {
         return this.serializer.getState();
     }
 
