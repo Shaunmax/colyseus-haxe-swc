@@ -64,7 +64,7 @@ class StateContainer {
             rawRules: rawRules,
 #if haxe4
             rules: rawRules.map(function(segment) {
-              if (Std.is(segment, String)) {
+              if (Std.isOfType(segment, String)) {
                   // replace placeholder matchers
                   if (segment.indexOf(":") == 0) {
                       var matcher = this.matcherPlaceholders.get(segment);
@@ -83,7 +83,7 @@ class StateContainer {
           })
 #else
             rules: Lambda.map(rawRules, function(segment) {
-              if (Std.is(segment, String)) {
+              if (Std.isOfType(segment, String)) {
                   // replace placeholder matchers
                   if (segment.indexOf(":") == 0) {
                       var matcher = this.matcherPlaceholders.get(segment);
