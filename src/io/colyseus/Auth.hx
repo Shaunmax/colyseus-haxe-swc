@@ -76,6 +76,9 @@ class Auth {
     //
     req.setHeader('X-HTTP-Method-Override', method);
     req.request(true);
+#elseif flash
+    req.setHeader('X-HTTP-Method-Override', method);
+    req.request(true);
 #else
     req.customRequest(false, responseBytes, null, method);
 #end
