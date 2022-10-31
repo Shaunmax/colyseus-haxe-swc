@@ -3,6 +3,9 @@
 # exposed classes
 io.colyseus.Client
 io.colyseus.Room
+Message
+MyRoomState
+Player
 
 -lib hxcpp
 -lib colyseus-websocket
@@ -16,8 +19,12 @@ io.colyseus.Room
 -dce full
 # -js build/colyseus.js
 
--cpp build/cpp
+-swf-version 11
+-swf build/colyseus.swc
+
+# -cpp build/cpp
 
 -D static_link
 # -D dll_export # WINDOWS?
 -D actuate
+#--no-traces
