@@ -31,27 +31,26 @@ class Client {
         this.auth = new Auth(this.endpoint);
     }
 
-    @:generic
     public function joinOrCreate<T>(roomName: String, options: Map<String, Dynamic>, stateClass: Class<T>, callback: (MatchMakeError, Room<T>)->Void) {
         this.createMatchMakeRequest('joinOrCreate', roomName, options, stateClass, callback);
     }
 
-    @:generic
+    
     public function create<T>(roomName: String, options: Map<String, Dynamic>, stateClass: Class<T>, callback: (MatchMakeError, Room<T>)->Void) {
         this.createMatchMakeRequest('create', roomName, options, stateClass, callback);
     }
 
-    @:generic
+    
     public function join<T>(roomName: String, options: Map<String, Dynamic>, stateClass: Class<T>, callback: (MatchMakeError, Room<T>)->Void) {
         this.createMatchMakeRequest('join', roomName, options, stateClass, callback);
     }
 
-    @:generic
+    
     public function joinById<T>(roomId: String, options: Map<String, Dynamic>, stateClass: Class<T>, callback: (MatchMakeError, Room<T>)->Void) {
         this.createMatchMakeRequest('joinById', roomId, options, stateClass, callback);
     }
 
-    @:generic
+    
     public function reconnect<T>(roomId: String, sessionId: String, stateClass: Class<T>, callback: (MatchMakeError, Room<T>)->Void) {
         this.createMatchMakeRequest('joinById', roomId, [ "sessionId" => sessionId ], stateClass, callback);
     }
@@ -60,7 +59,7 @@ class Client {
         this.request("GET", "/matchmake/" + roomName, null, callback);
     }
 
-    @:generic
+    
     public function consumeSeatReservation<T>(response: Dynamic, stateClass: Class<T>, callback: (MatchMakeError, Room<T>)->Void) {
         var room: Room<T> = new Room<T>(response.room.name, stateClass);
 
@@ -81,7 +80,6 @@ class Client {
         room.connect(this.createConnection(response.room.processId + "/" + room.id, ["sessionId" => room.sessionId]));
     }
 
-    @:generic
     private function createMatchMakeRequest<T>(
         method: String,
         roomName: String,
