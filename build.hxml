@@ -3,9 +3,9 @@
 # exposed classes
 io.colyseus.Client
 io.colyseus.Room
-Message
-MyRoomState
-Player
+tictactoe.Message
+tictactoe.Player
+tictactoe.MyRoomState
 
 -lib hxcpp
 -lib colyseus-websocket
@@ -20,7 +20,7 @@ Player
 # -js build/colyseus.js
 
 -swf-version 11
--swf build/colyseus.swc
+-swf build/colyseus_tic_tac_toe.swc
 
 # -cpp build/cpp
 
