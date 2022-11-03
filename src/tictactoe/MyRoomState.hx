@@ -25,6 +25,9 @@ class MyRoomState extends Schema {
 	@:type("string")
 	public var winline: String = "";
 
+	@:type("number")
+	public var turnCount: Dynamic = 0;
+
 	@:type("boolean")
 	public var draw: Bool = false;
 
