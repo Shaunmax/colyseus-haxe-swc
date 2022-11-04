@@ -6,7 +6,7 @@ package {
     import starling.rendering.VertexData;
     import starling.textures.Texture;
 
-    public class QuadSection extends Mesh
+    public class QuadSectionArc extends Mesh
     {
         private var _width:Number;
         private var _height:Number;
@@ -17,7 +17,7 @@ package {
 
         private static var sPoint:Point = new Point();
 
-        public function QuadSection(width:Number, height:Number, color:uint=0xffffff)
+        public function QuadSectionArc(width:Number, height:Number, color:uint=0xffffff)
         {
             _color = color;
             _width = width;
@@ -25,16 +25,14 @@ package {
             _ratio = 1.0;
             _clockwise = true;
             _slices = [
-                { ratio: 0.0,   x: _width / 2, y: 0       },
-                { ratio: 0.125, x: _width,     y: 0       },
-                { ratio: 0.375, x: _width,     y: _height },
-                { ratio: 0.625, x: 0,          y: _height },
-                { ratio: 0.875, x: 0,          y: 0       },
-                { ratio: 1.0,   x: _width / 2, y: 0       }
+                { ratio: 0.0,  x: 0,      y: _height },
+                { ratio: 0.25, x: 0,      y: 0       },
+                { ratio: 0.75, x: _width, y: 0       },
+                { ratio: 1.0,  x: _width, y: _height }
             ];
 
-            var vertexData:VertexData = new VertexData(null, 6);
-            var indexData:IndexData = new IndexData(15);
+            var vertexData:VertexData = new VertexData(null, 5);
+            var indexData:IndexData = new IndexData(9);
 
             super(vertexData, indexData);
 
@@ -48,9 +46,9 @@ package {
 
             if (_ratio > 0)
             {
-                var angle:Number = _ratio * Math.PI * 2.0 - Math.PI / 2.0;
+                var angle:Number = _ratio * Math.PI;
                 var numSlices:int = _slices.length;
-                updateVertex(0, _width / 2, _height / 2); // center point
+                updateVertex(0, _width / 2, _height); // origin
 
                 for (var i:int=1; i<numSlices; ++i)
                 {
@@ -104,7 +102,7 @@ package {
             if (tDen == 0.0) return null; // parallel or identical
 
             var cx:Number = _width  / 2.0;
-            var cy:Number = _height / 2.0;
+            var cy:Number = _height;
             var t:Number = (aby * (cx - ax) - abx * (cy - ay)) / tDen;
 
             out.x = cx + t * cdx;
@@ -143,9 +141,9 @@ package {
             }
         }
 
-        public static function fromTexture(texture:Texture):QuadSection
+        public static function fromTexture(texture:Texture):QuadSectionArc
         {
-            var quadPie:QuadSection = new QuadSection(texture.width, texture.height);
+            var quadPie:QuadSectionArc = new QuadSectionArc(texture.width, texture.height);
             quadPie.texture = texture;
             return quadPie;
         }

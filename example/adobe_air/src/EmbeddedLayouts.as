@@ -2,7 +2,7 @@ package
 {
     public class EmbeddedLayouts
     {
-        [Embed(source="/../assets/layouts/game.json", mimeType="application/octet-stream")]
+        [Embed(source="/../assets/layouts/new_game.json", mimeType="application/octet-stream")]
         public static const GAME_UI:Class;
 
         [Embed(source="/../assets/layouts/menu.json", mimeType="application/octet-stream")]

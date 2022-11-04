@@ -1,17 +1,12 @@
 package  {
 
 import feathers.controls.LayoutGroup;
-
-import flash.geom.Point;
-
 import starling.core.Starling;
-import starling.display.DisplayObject;
 import starling.display.Image;
 import starling.display.Sprite;
 import starling.events.Touch;
 import starling.events.TouchEvent;
 import starling.events.TouchPhase;
-import starling.utils.Color;
 import starling.utils.deg2rad;
 
 public class Card extends Sprite{
@@ -94,17 +89,17 @@ public class Card extends Sprite{
                 _line_1.y = _cell_6.y;
                 _line_1.rotation = deg2rad(90);
                 break;
-            case "d0":
+            case "d1":
                 _line_1.x = _cell_5.x;
                 _line_1.y = _cell_5.y;
-                _line_1.rotation = deg2rad(135);
+                _line_1.rotation = deg2rad(45);
                 scale = 6;
                 break;
 
             case "d2":
                 _line_1.x = _cell_5.x;
                 _line_1.y = _cell_5.y;
-                _line_1.rotation = deg2rad(45);
+                _line_1.rotation = deg2rad(135);
                 scale = 6;
                 break;
 
@@ -115,7 +110,7 @@ public class Card extends Sprite{
         _line_1.visible = true;
 
         Starling.juggler.tween(_line_1, 0.5, { "scaleX": scale , "color" : col});
-        Starling.juggler.delayCall(TicTacToe.displayResult, 2);
+        Starling.juggler.delayCall(TicTacToe.displayResult, 1);
     }
 
     private function onTrigDaub(event:TouchEvent):void {
@@ -125,6 +120,7 @@ public class Card extends Sprite{
         if (touch_ended != null) {
 
             if (touched_cell as CellSp && touched_cell.daubed == false) {
+                this.touchable = false;
                 TicTacToe.checkDaub(touched_cell.getPos());
                 touched_cell.daub(TicTacToe.my_player_no, true);
             }

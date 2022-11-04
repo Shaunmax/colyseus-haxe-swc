@@ -5,7 +5,6 @@ const TURN_TIMEOUT = 10
 const BOARD_WIDTH = 3;
 
 export class MyRoom extends Room<MyRoomState> {
-
   maxClients = 2;
   randomMoveTimeout: Delayed;
 
@@ -34,7 +33,8 @@ export class MyRoom extends Room<MyRoomState> {
   }
 
   startGame(){
-    this.broadcast("data", {current_turn: this.state.currentTurn });
+    this.state.turnCount += 1;
+    this.broadcast("data", {current_turn: this.state.currentTurn, turn_count:this.state.turnCount});
     this.setAutoMoveTimeout();
   }
 
@@ -74,7 +74,8 @@ export class MyRoom extends Room<MyRoomState> {
           const otherPlayerSessionId = (client.sessionId === playerIds[0]) ? playerIds[1] : playerIds[0];
 
           this.state.currentTurn = otherPlayerSessionId;
-          this.broadcast("data", {current_turn: this.state.currentTurn });
+          this.state.turnCount += 1;
+          this.broadcast("data", {current_turn: this.state.currentTurn, turn_count:this.state.turnCount});
           this.setAutoMoveTimeout();
         }
 
@@ -142,8 +143,8 @@ export class MyRoom extends Room<MyRoomState> {
         if(board[i] !== move) { break; }
         if(xy == BOARD_WIDTH-1) {
           won = true;
-          this.state.winline = String("d"  + y);
-          console.log("d1 y = ", y);
+          this.state.winline = "d1";
+          console.log("d1");
         }
       }
     }
@@ -155,8 +156,8 @@ export class MyRoom extends Room<MyRoomState> {
       if(board[i] !== move) { break; }
       if(x == BOARD_WIDTH-1){
         won = true;
-        this.state.winline = String("d"  + y);
-        console.log("d2  y = ", y);
+        this.state.winline = "d2";
+        console.log("d2");
       }
     }
 

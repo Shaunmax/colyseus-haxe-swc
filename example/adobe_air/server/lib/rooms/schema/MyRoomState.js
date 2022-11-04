@@ -33,6 +33,7 @@ class MyRoomState extends schema_1.Schema {
         super(...arguments);
         this.players = new schema_1.MapSchema();
         this.board = new schema_1.ArraySchema(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this.turnCount = 0;
     }
 }
 __decorate([
@@ -50,6 +51,9 @@ __decorate([
 __decorate([
     (0, schema_1.type)("string")
 ], MyRoomState.prototype, "winline", void 0);
+__decorate([
+    (0, schema_1.type)("number")
+], MyRoomState.prototype, "turnCount", void 0);
 __decorate([
     (0, schema_1.type)("boolean")
 ], MyRoomState.prototype, "draw", void 0);

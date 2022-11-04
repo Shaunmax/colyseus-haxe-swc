@@ -17,6 +17,7 @@ export class MyRoomState extends Schema {
   @type(["number"]) board: number[] = new ArraySchema<number>(0, 0, 0, 0, 0, 0, 0, 0, 0);
   @type("string") winner: string;
   @type("string") winline: string;
+  @type("number") turnCount: number = 0;
   @type("boolean") draw: boolean;
 
 }

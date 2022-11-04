@@ -25,12 +25,12 @@
             "customParams":{},
             "params":{
               "horizontalCenter":0,
-              "verticalCenter":-200
+              "top":40
             }
           },
           "name":"header_layout",
           "x":17,
-          "y":216
+          "y":40
         }
       },
       {

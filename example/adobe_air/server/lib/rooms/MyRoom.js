@@ -33,7 +33,8 @@ class MyRoom extends colyseus_1.Room {
         }
     }
     startGame() {
-        this.broadcast("data", { current_turn: this.state.currentTurn });
+        this.state.turnCount += 1;
+        this.broadcast("data", { current_turn: this.state.currentTurn, turn_count: this.state.turnCount });
         this.setAutoMoveTimeout();
     }
     endGame() {
@@ -67,7 +68,8 @@ class MyRoom extends colyseus_1.Room {
                     // switch turn
                     const otherPlayerSessionId = (client.sessionId === playerIds[0]) ? playerIds[1] : playerIds[0];
                     this.state.currentTurn = otherPlayerSessionId;
-                    this.broadcast("data", { current_turn: this.state.currentTurn });
+                    this.state.turnCount += 1;
+                    this.broadcast("data", { current_turn: this.state.currentTurn, turn_count: this.state.turnCount });
                     this.setAutoMoveTimeout();
                 }
             }
@@ -132,8 +134,8 @@ class MyRoom extends colyseus_1.Room {
                 }
                 if (xy == BOARD_WIDTH - 1) {
                     won = true;
-                    this.state.winline = String("d" + y);
-                    console.log("d1 y = ", y);
+                    this.state.winline = "d1";
+                    console.log("d1");
                 }
             }
         }
@@ -146,8 +148,8 @@ class MyRoom extends colyseus_1.Room {
             }
             if (x == BOARD_WIDTH - 1) {
                 won = true;
-                this.state.winline = String("d" + y);
-                console.log("d2  y = ", y);
+                this.state.winline = "d2";
+                console.log("d2");
             }
         }
         return won;

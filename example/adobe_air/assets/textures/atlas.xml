@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker https://www.codeandweb.com/texturepacker -->
-<!-- $TexturePacker:SmartUpdate:9415f601f61a67c11cf6a886c262f3b2:ec6ac234afeaa99eef9554582220f2fe:cde709370900f12288f3449eded86f07$ -->
-<TextureAtlas imagePath="atlas.png" width="2048" height="1024">
-    <SubTexture name="air_logo" x="1" y="336" width="555" height="205"/>
-    <SubTexture name="cell_00" x="649" y="141" width="193" height="193"/>
-    <SubTexture name="cell_01" x="844" y="141" width="193" height="193"/>
-    <SubTexture name="cell_02" x="1039" y="141" width="193" height="193"/>
-    <SubTexture name="cell_03" x="1234" y="141" width="193" height="193"/>
-    <SubTexture name="cell_04" x="1429" y="141" width="193" height="193"/>
-    <SubTexture name="cell_bg" x="1624" y="141" width="193" height="193"/>
-    <SubTexture name="cell_bg2" x="457" y="141" width="190" height="190"/>
-    <SubTexture name="col_logo" x="497" y="1" width="475" height="121"/>
-    <SubTexture name="feathers_logo" x="107" y="1" width="388" height="50"/>
+<!-- $TexturePacker:SmartUpdate:ed5cf8bd0e3e88bb21b3e5baed453f2c:002ac7d26dc878a4b1a02f04dea65eb0:cde709370900f12288f3449eded86f07$ -->
+<TextureAtlas imagePath="atlas.png" width="1024" height="1024">
+    <SubTexture name="ArialRound" x="107" y="1" width="188" height="291"/>
+    <SubTexture name="cell_00" x="297" y="1" width="193" height="193"/>
+    <SubTexture name="cell_01" x="492" y="1" width="193" height="193"/>
+    <SubTexture name="cell_02" x="687" y="1" width="193" height="193"/>
+    <SubTexture name="cell_03" x="1" y="294" width="193" height="193"/>
+    <SubTexture name="cell_04" x="196" y="294" width="193" height="193"/>
+    <SubTexture name="cell_bg" x="391" y="294" width="193" height="193"/>
     <SubTexture name="h_line" x="1" y="1" width="104" height="13"/>
-    <SubTexture name="header_text" x="974" y="1" width="606" height="128"/>
-    <SubTexture name="opponent" x="1" y="141" width="150" height="150"/>
-    <SubTexture name="play_btn" x="1582" y="1" width="358" height="138"/>
-    <SubTexture name="player" x="153" y="141" width="150" height="150"/>
-    <SubTexture name="radial_progress_bar" x="305" y="141" width="150" height="150"/>
-    <SubTexture name="saranaigame" x="781" y="336" width="533" height="501"/>
-    <SubTexture name="starling_logo" x="558" y="336" width="221" height="223"/>
+    <SubTexture name="header_text" x="1" y="641" width="606" height="128"/>
+    <SubTexture name="new_opponent" x="586" y="294" width="300" height="150"/>
+    <SubTexture name="new_radial_progress_bar" x="1" y="489" width="300" height="150"/>
+    <SubTexture name="new_you" x="303" y="489" width="300" height="150"/>
+    <SubTexture name="play_btn" x="605" y="489" width="358" height="138"/>
 </TextureAtlas>
