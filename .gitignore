@@ -5,3 +5,6 @@
 .haxerc
 /example/heaps/build/html5/*.js
 /example/heaps/build/html5/*.js.map
+/bin
+/src/Bplayer.hx
+/src/MyRoomState.hx
