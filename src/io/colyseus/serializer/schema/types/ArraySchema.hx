@@ -14,7 +14,6 @@ interface IArraySchema extends ISchemaCollection {
 }
 
 @:keep
-@:generic
 class ArraySchemaImpl<T> implements IRef implements IArraySchema implements ArrayAccess<Int> {
   public var __refId: Int = 0;
   public var _childType: Dynamic;

@@ -1,0 +1,29 @@
+digraph graphname {
+	node [shape=plaintext];
+n27286[label=<<table BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<tr><td port="in" bgcolor="lightgray">(27286) BKConditional</td></tr>
+	<tr><td port="out"></td></tr>
+</table>>];
+n27285[label=<<table BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<tr><td port="in" bgcolor="lightgray">(27285) BKConditional</td></tr>
+	<tr><td port="out"></td></tr>
+</table>>];
+n27284[label=<<table BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<tr><td port="in" bgcolor="lightgray">(27284) BKFunctionEnd</td></tr>
+	<tr><td port="out"></td></tr>
+</table>>];
+n27283[label=<<table BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<tr><td port="in" bgcolor="lightgray">(27283) BKFunctionBegin</td></tr>
+	<tr><td port="e0" align="left">var `this = this</td></tr>
+	<tr><td port="e1" align="left">super(host, port, debug)</td></tr>
+	<tr><td port="e2" align="left">this.debug = debug</td></tr>
+	<tr><td port="e3" align="left">var tmp</td></tr>
+	<tr><td port="e4" align="left">var secure = secure</td></tr>
+	<tr><td port="out"></td></tr>
+</table>>];
+n1[label=<<table BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<tr><td port="in" bgcolor="lightgray">(1) BKRoot</td></tr>
+	<tr><td port="out"></td></tr>
+</table>>];
+n1:out -> n27283:in[label="CFGFunction"];
+}

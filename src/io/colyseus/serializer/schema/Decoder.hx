@@ -8,13 +8,11 @@ import io.colyseus.serializer.schema.Schema.It;
 import io.colyseus.serializer.schema.Schema.DataChange;
 import io.colyseus.serializer.schema.Schema.SPEC;
 import io.colyseus.serializer.schema.Schema.OPERATION;
-
 import io.colyseus.serializer.schema.encoding.Decode;
 import haxe.io.Bytes;
 
-typedef DecodedValue = { value : Dynamic, previousValue : Dynamic };
+typedef DecodedValue = {value:Dynamic, previousValue:Dynamic};
 
-@:generic
 class Decoder<T> {
 	public var state:T;
 	public var context:TypeContext = new TypeContext();
@@ -65,16 +63,13 @@ class Decoder<T> {
 
 			if (Std.isOfType(ref, Schema)) {
 				isSchemaDefinitionMismatch = !decodeSchema(bytes, it, (ref : Schema));
-
-            } else if (Std.isOfType(ref, IMapSchema)) {
+			} else if (Std.isOfType(ref, IMapSchema)) {
 				isSchemaDefinitionMismatch = !decodeMapSchema(bytes, it, (ref : IMapSchema));
-
-            } else if (Std.isOfType(ref, IArraySchema)) {
+			} else if (Std.isOfType(ref, IArraySchema)) {
 				isSchemaDefinitionMismatch = !decodeArraySchema(bytes, it, (ref : IArraySchema));
+			}
 
-            }
-
-            if (isSchemaDefinitionMismatch) {
+			if (isSchemaDefinitionMismatch) {
 				trace("WARNING: @colyseus/schema definition mismatch?");
 				//
 				// keep skipping next bytes until reaches a known structure
@@ -112,7 +107,9 @@ class Decoder<T> {
 		var fieldIndex:Int = byte % (operation == 0 ? 255 : operation);
 
 		var fieldName:String = ref._indexes.get(fieldIndex);
-		if (fieldName == null) { return false; }
+		if (fieldName == null) {
+			return false;
+		}
 
 		var fieldType:Dynamic = ref._types.get(fieldIndex);
 		var childType:Dynamic = ref._childTypes.get(fieldIndex);
@@ -185,9 +182,9 @@ class Decoder<T> {
 		}
 
 		return true;
-    }
+	}
 
-    public function decodeArraySchema(bytes: Bytes, it: It, ref: IArraySchema): Bool {
+	public function decodeArraySchema(bytes:Bytes, it:It, ref:IArraySchema):Bool {
 		var operation = bytes.get(it.offset++);
 		var index:Int;
 
@@ -195,11 +192,9 @@ class Decoder<T> {
 		if (operation == OPERATION.CLEAR) {
 			ref.clear(allChanges, refs);
 			return true;
-
 		} else if (operation == OPERATION.REVERSE) {
 			ref.reverse();
 			return true;
-
 		} else if (operation == OPERATION.DELETE_BY_REFID) {
 			var refId = Decode.number(bytes, it);
 			var item = refs.get(refId);
@@ -214,33 +209,31 @@ class Decoder<T> {
 				previousValue: item
 			});
 			return true;
-
-        } else if (operation == OPERATION.ADD_BY_REFID) {
-            var refId = Decode.number(bytes, it);
-            var item = refs.get(refId);
-            if (item != null) {
-                index = ref.indexOf(item);
-            } else {
-                index = ref.length;
-            }
-
-        } else {
-            index = Decode.number(bytes, it);
-        }
+		} else if (operation == OPERATION.ADD_BY_REFID) {
+			var refId = Decode.number(bytes, it);
+			var item = refs.get(refId);
+			if (item != null) {
+				index = ref.indexOf(item);
+			} else {
+				index = ref.length;
+			}
+		} else {
+			index = Decode.number(bytes, it);
+		}
 
 		var fieldType:Dynamic = null;
 		var childType:Dynamic = null;
 
-        var collectionChildType = ref._childType;
-        var isPrimitiveFieldType = Std.isOfType(collectionChildType, String);
+		var collectionChildType = ref._childType;
+		var isPrimitiveFieldType = Std.isOfType(collectionChildType, String);
 
-        fieldType = (isPrimitiveFieldType) ? collectionChildType : "ref";
+		fieldType = (isPrimitiveFieldType) ? collectionChildType : "ref";
 
-        if (!isPrimitiveFieldType) {
-            childType = collectionChildType;
-        }
+		if (!isPrimitiveFieldType) {
+			childType = collectionChildType;
+		}
 
-        var r = decodeValue(bytes, it, ref, index, fieldType, childType, operation);
+		var r = decodeValue(bytes, it, ref, index, fieldType, childType, operation);
 
 		if (r.value != null) {
 			ref.setByIndex(index, cast r.value, operation);
@@ -257,9 +250,9 @@ class Decoder<T> {
 			});
 		}
 		return true;
-    }
+	}
 
-	public function decodeValue(bytes: Bytes, it: It, ref: IRef, fieldIndex: Int, fieldType: String, childType: Dynamic, operation: Int):DecodedValue {
+	public function decodeValue(bytes:Bytes, it:It, ref:IRef, fieldIndex:Int, fieldType:String, childType:Dynamic, operation:Int):DecodedValue {
 		var value:Dynamic = null;
 		var previousValue:Dynamic = ref.getByIndex(fieldIndex);
 
@@ -284,39 +277,31 @@ class Decoder<T> {
 			// FIXME: refactor me.
 			// Don't do anything.
 			//
-
 		} else if (fieldType == "ref") {
 			var refId = Decode.number(bytes, it);
 			value = refs.get(refId);
 
-            if (previousValue != null) {
-                var previousRefId = previousValue.__refId;
-                if (
-                    previousRefId > 0 &&
-                    refId != previousRefId &&
-                    // FIXME: we may need to check for REPLACE operation as well
-                    ((operation & cast OPERATION.DELETE) == OPERATION.DELETE)
-                ) {
-                    refs.remove(previousRefId);
-                }
-            }
+			if (previousValue != null) {
+				var previousRefId = previousValue.__refId;
+				if (previousRefId > 0 && refId != previousRefId && // FIXME: we may need to check for REPLACE operation as well
+					((operation & cast OPERATION.DELETE) == OPERATION.DELETE)) {
+					refs.remove(previousRefId);
+				}
+			}
 
-            if (((operation & cast OPERATION.ADD) == OPERATION.ADD)) {
-                var concreteChildType = this.getSchemaType(bytes, it, childType);
-                if (value == null) {
-                    value = Type.createInstance(concreteChildType, []);
-                    value.__refId = refId;
-                }
+			if (((operation & cast OPERATION.ADD) == OPERATION.ADD)) {
+				var concreteChildType = this.getSchemaType(bytes, it, childType);
+				if (value == null) {
+					value = Type.createInstance(concreteChildType, []);
+					value.__refId = refId;
+				}
 
-				refs.add(refId, value, (
-                    value != previousValue || // increment ref count if value has changed
-                    (operation == OPERATION.DELETE_AND_ADD && value == previousValue) // increment ref count if it's a DELETE operation
-                ));
-            }
-
+				refs.add(refId, value, (value != previousValue || // increment ref count if value has changed
+					(operation == OPERATION.DELETE_AND_ADD && value == previousValue) // increment ref count if it's a DELETE operation
+				));
+			}
 		} else if (childType == null) {
 			value = Decode.decodePrimitiveType(fieldType, bytes, it);
-
 		} else {
 			var refId = Decode.number(bytes, it);
 
@@ -330,13 +315,10 @@ class Decoder<T> {
 			//     ? Type.getClass(ref)
 			//     : CustomType.getInstance().get(fieldType);
 
-			var collectionClass: Dynamic = (fieldType == null)
-                ? Type.getClass(ref)
-                : #if (nodejs || js) CustomType.getInstance().get(fieldType) #else Type.getClass(previousValue) #end;
+			var collectionClass:Dynamic = (fieldType == null) ? Type.getClass(ref) : #if (nodejs || js) CustomType.getInstance()
+				.get(fieldType) #else Type.getClass(previousValue) #end;
 
-			var valueRef:ISchemaCollection = (refs.has(refId))
-                ? previousValue ?? refs.get(refId)
-                : Type.createInstance(collectionClass, []);
+			var valueRef:ISchemaCollection = (refs.has(refId)) ? previousValue ?? refs.get(refId) : Type.createInstance(collectionClass, []);
 
 			value = valueRef.clone();
 			value.__refId = refId;
@@ -346,7 +328,7 @@ class Decoder<T> {
 				if (previousValue.__refId > 0 && refId != previousValue.__refId) {
 					refs.remove(previousValue.__refId);
 
-                    for (index => item in (previousValue : ISchemaCollection)) {
+					for (index => item in (previousValue : ISchemaCollection)) {
 						allChanges.push({
 							refId: previousValue.__refId,
 							op: cast OPERATION.DELETE,
@@ -355,7 +337,7 @@ class Decoder<T> {
 							value: null,
 							previousValue: item
 						});
-                    }
+					}
 				}
 			}
 
@@ -374,5 +356,4 @@ class Decoder<T> {
 
 		return type;
 	}
-
 }

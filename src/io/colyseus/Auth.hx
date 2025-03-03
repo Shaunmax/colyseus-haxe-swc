@@ -5,7 +5,6 @@ using io.colyseus.events.EventHandler;
 using io.colyseus.error.HttpException;
 
 @:keep
-@:generic
 typedef AuthData<T> = {
     ?token: String,
     ?user: T,

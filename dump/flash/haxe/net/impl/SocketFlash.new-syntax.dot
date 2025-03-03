@@ -1,0 +1,10 @@
+digraph graphname {
+n27286 [shape=box,label="(27286)"];
+n27285 [shape=box,label="(27285)"];
+n27284 [shape=box,label="<function-end>
+(27284)"];
+n27283 [shape=box,label="<function-begin>
+(27283)\nvar `this = this\nsuper(host, port, debug)\nthis.debug = debug\nvar tmp\nvar secure = secure"];
+n1 [shape=box,label="<root>
+(1)"];
+}

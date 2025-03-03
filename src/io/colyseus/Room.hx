@@ -6,7 +6,6 @@ import io.colyseus.serializer.Serializer;
 import io.colyseus.serializer.SchemaSerializer;
 import io.colyseus.serializer.NoneSerializer;
 import io.colyseus.serializer.FossilDeltaSerializer;
-
 import io.colyseus.serializer.schema.Schema.It;
 import io.colyseus.serializer.schema.Schema.SPEC;
 import io.colyseus.serializer.schema.encoding.Decode;
@@ -17,239 +16,221 @@ import haxe.io.Bytes;
 import haxe.ds.Map;
 import org.msgpack.MsgPack;
 
+@:keep
 class Room<T> {
-    public var roomId: String;
-    public var sessionId: String;
-    public var reconnectionToken: String;
+	public var roomId:String;
+	public var sessionId:String;
+	public var reconnectionToken:String;
 
-    public var name: String;
+	public var name:String;
 
-    // callbacks
-    public var onJoin = new EventHandler<Void->Void>();
-    public var onStateChange = new EventHandler<Dynamic->Void>();
-    public var onError = new EventHandler<Int->String->Void>();
-    public var onLeave = new EventHandler<Void->Void>();
-    private var onMessageHandlers = new Map<String, Dynamic->Void>();
+	// callbacks
+	public var onJoin = new EventHandler<Void->Void>();
+	public var onStateChange = new EventHandler<Dynamic->Void>();
+	public var onError = new EventHandler<Int->String->Void>();
+	public var onLeave = new EventHandler<Void->Void>();
 
-    public var connection: Connection;
+	private var onMessageHandlers = new Map<String, Dynamic->Void>();
 
-    public var serializerId: String = null;
-    public var serializer: Serializer = null;
+	public var connection:Connection;
 
-    private var tmpStateClass: Class<T>;
+	public var serializerId:String = null;
+	public var serializer:Serializer = null;
 
-    public function new (name: String, ?cls: Class<T>) {
-        this.roomId = null;
-        this.name = name;
-        this.tmpStateClass = cls;
-    }
+	private var tmpStateClass:Class<T>;
 
-    public function connect(connection: Connection, room: Room<T>, ?devModeCloseCallback) {
-        if (room == null) {
-            room = this;
-        }
-        room.connection = connection;
-        room.connection.reconnectionEnabled = false;
+	public function new(name:String, ?cls:Class<T>) {
+		this.roomId = null;
+		this.name = name;
+		this.tmpStateClass = cls;
+	}
 
-        room.connection.onMessage = function (bytes) {
-            room.onMessageCallback(bytes);
-        }
+	public function connect(connection:Connection, room:Room<T>, ?devModeCloseCallback) {
+		if (room == null) {
+			room = this;
+		}
+		room.connection = connection;
+		room.connection.reconnectionEnabled = false;
 
-        room.connection.onClose = function (e) {
-            if (devModeCloseCallback != null && e.code == Protocol.DEVMODE_RESTART) {
-                devModeCloseCallback();
-            } else {
-                room.teardown();
-                room.onLeave.dispatch();
-            }
-        }
+		room.connection.onMessage = function(bytes) {
+			room.onMessageCallback(bytes);
+		}
 
-        room.connection.onError = function (e) {
-            room.onError.dispatch(0, e);
-        };
-    }
+		room.connection.onClose = function(e) {
+			if (devModeCloseCallback != null && e.code == Protocol.DEVMODE_RESTART) {
+				devModeCloseCallback();
+			} else {
+				room.teardown();
+				room.onLeave.dispatch();
+			}
+		}
 
-    public function leave(consented: Bool = true) {
-        if (this.connection != null) {
-            if (consented) {
+		room.connection.onError = function(e) {
+			room.onError.dispatch(0, e);
+		};
+	}
+
+	public function leave(consented:Bool = true) {
+		if (this.connection != null) {
+			if (consented) {
 				var bytes = new BytesOutput();
 				bytes.writeByte(Protocol.LEAVE_ROOM);
-                this.connection.send(bytes.getBytes());
+				this.connection.send(bytes.getBytes());
+			} else {
+				this.connection.close();
+			}
+		} else {
+			this.onLeave.dispatch();
+		}
+	}
 
-            } else {
-                this.connection.close();
-            }
+	public function send(type:Dynamic, ?message:Dynamic) {
+		var bytesToSend = new BytesOutput();
+		bytesToSend.writeByte(Protocol.ROOM_DATA);
 
-        } else {
-            this.onLeave.dispatch();
-        }
-    }
+		if (Std.isOfType(type, String)) {
+			var encodedType = Bytes.ofString(type);
+			bytesToSend.writeByte(encodedType.length | 0xa0);
+			bytesToSend.writeBytes(encodedType, 0, encodedType.length);
+		} else {
+			bytesToSend.writeByte(type);
+		}
 
-    public function send(type: Dynamic, ?message: Dynamic) {
-        var bytesToSend = new BytesOutput();
-        bytesToSend.writeByte(Protocol.ROOM_DATA);
+		if (message != null) {
+			var encodedMessage = MsgPack.encode(message);
+			bytesToSend.writeBytes(encodedMessage, 0, encodedMessage.length);
+		}
 
-        if (Std.isOfType(type, String)) {
-            var encodedType = Bytes.ofString(type);
-            bytesToSend.writeByte(encodedType.length | 0xa0);
-            bytesToSend.writeBytes(encodedType, 0, encodedType.length);
+		this.connection.send(bytesToSend.getBytes());
+	}
 
-        } else {
-            bytesToSend.writeByte(type);
-        }
+	public function sendBytes(type:Dynamic, ?bytes:Dynamic) {
+		var bytesToSend = new BytesOutput();
+		bytesToSend.writeByte(Protocol.ROOM_DATA_BYTES);
 
-        if (message != null) {
-            var encodedMessage = MsgPack.encode(message);
-            bytesToSend.writeBytes(encodedMessage, 0, encodedMessage.length);
-        }
+		if (Std.isOfType(type, String)) {
+			var encodedType = Bytes.ofString(type);
+			bytesToSend.writeByte(encodedType.length | 0xa0);
+			bytesToSend.writeBytes(encodedType, 0, encodedType.length);
+		} else {
+			bytesToSend.writeByte(type);
+		}
 
-        this.connection.send(bytesToSend.getBytes());
-    }
+		bytesToSend.writeBytes(bytes, 0, bytes.length);
 
-    public function sendBytes(type: Dynamic, ?bytes: Dynamic) {
-        var bytesToSend = new BytesOutput();
-        bytesToSend.writeByte(Protocol.ROOM_DATA_BYTES);
+		this.connection.send(bytesToSend.getBytes());
+	}
 
-        if (Std.isOfType(type, String)) {
-            var encodedType = Bytes.ofString(type);
-            bytesToSend.writeByte(encodedType.length | 0xa0);
-            bytesToSend.writeBytes(encodedType, 0, encodedType.length);
+	public function onMessage(type:Dynamic, callback:Dynamic->Void) {
+		this.onMessageHandlers[this.getMessageHandlerKey(type)] = callback;
+		return this;
+	}
 
-        } else {
-            bytesToSend.writeByte(type);
-        }
+	public var _state(get, null):T;
 
-        bytesToSend.writeBytes(bytes, 0, bytes.length);
+	@:getter(state)
+	function get__state():T {
+		return this.serializer.getState();
+	}
 
-        this.connection.send(bytesToSend.getBytes());
-    }
+	public function teardown() {
+		if (this.serializer != null) {
+			this.serializer.teardown();
+		}
 
-    public function onMessage(type: Dynamic, callback: Dynamic->Void) {
-        this.onMessageHandlers[this.getMessageHandlerKey(type)] = callback;
-        return this;
-    }
+		// this.onJoin.removeAll();
+		// this.onStateChange.removeAll();
+		// this.onMessage.removeAll();
+		// this.onError.removeAll();
+		// this.onLeave.removeAll();
+	}
 
-    public var state (get, null): T;
-    function get_state () : T {
-        return this.serializer.getState();
-    }
+	private function onMessageCallback(data:Bytes) {
+		var code = data.get(0);
+		var it:It = {offset: 1};
 
-    public function teardown() {
-        if (this.serializer != null) {
-            this.serializer.teardown();
-        }
+		if (code == Protocol.JOIN_ROOM) {
+			var reconnectionToken = data.getString(it.offset + 1, data.get(it.offset));
+			it.offset += reconnectionToken.length + 1;
 
-        // this.onJoin.removeAll();
-        // this.onStateChange.removeAll();
-        // this.onMessage.removeAll();
-        // this.onError.removeAll();
-        // this.onLeave.removeAll();
-    }
+			this.serializerId = data.getString(it.offset + 1, data.get(it.offset));
+			it.offset += this.serializerId.length + 1;
 
-    private function onMessageCallback(data: Bytes) {
-        var code = data.get(0);
-        var it:It = {offset: 1};
+			if (this.serializerId == "schema") {
+				this.serializer = new SchemaSerializer<T>(tmpStateClass);
+			} else if (this.serializerId == "fossil-delta") {
+				this.serializer = new FossilDeltaSerializer();
+			} else {
+				this.serializer = new NoneSerializer();
+			}
 
-        if (code == Protocol.JOIN_ROOM) {
-            var reconnectionToken = data.getString(it.offset + 1, data.get(it.offset));
-            it.offset += reconnectionToken.length + 1;
+			if (data.length > it.offset) {
+				this.serializer.handshake(data, it.offset);
+			}
 
-            this.serializerId = data.getString(it.offset + 1, data.get(it.offset));
-            it.offset += this.serializerId.length + 1;
-
-            if (this.serializerId == "schema") {
-                this.serializer = new SchemaSerializer<T>(tmpStateClass);
-
-            } else if (this.serializerId == "fossil-delta") {
-                this.serializer = new FossilDeltaSerializer();
-
-            } else {
-                this.serializer = new NoneSerializer();
-            }
-
-            if (data.length > it.offset) {
-                this.serializer.handshake(data, it.offset);
-            }
-
-            // store local reconnection token
+			// store local reconnection token
 			this.reconnectionToken = this.roomId + ":" + reconnectionToken;
 
-            this.onJoin.dispatch();
+			this.onJoin.dispatch();
 
-            // acknowledge JOIN_ROOM
-            var bytes = new BytesOutput();
-            bytes.writeByte(Protocol.JOIN_ROOM);
-            this.connection.send(bytes.getBytes());
+			// acknowledge JOIN_ROOM
+			var bytes = new BytesOutput();
+			bytes.writeByte(Protocol.JOIN_ROOM);
+			this.connection.send(bytes.getBytes());
+		} else if (code == Protocol.ERROR) {
+			var errorCode:Int = Decode.number(data, it);
+			var message = Decode.string(data, it);
+			trace("Room error: code => " + errorCode + ", message => " + message);
+			this.onError.dispatch(errorCode, message);
+		} else if (code == Protocol.LEAVE_ROOM) {
+			this.leave();
+		} else if (code == Protocol.ROOM_STATE) {
+			this.setState(data.sub(it.offset, data.length - 1));
+		} else if (code == Protocol.ROOM_STATE_PATCH) {
+			this.patch(data.sub(it.offset, data.length - 1));
+		} else if (code == Protocol.ROOM_DATA) {
+			var type = (SPEC.stringCheck(data, it)) ? Decode.string(data, it) : Decode.number(data, it);
 
-        } else if (code == Protocol.ERROR) {
-            var errorCode: Int = Decode.number(data, it);
-            var message = Decode.string(data, it);
-            trace("Room error: code => " + errorCode + ", message => " + message);
-            this.onError.dispatch(errorCode, message);
+			var message = (data.length > it.offset) ? MsgPack.decode(data.sub(it.offset, data.length - it.offset)) : null;
 
-        } else if (code == Protocol.LEAVE_ROOM) {
-            this.leave();
+			this.dispatchMessage(type, message);
+		} else if (code == Protocol.ROOM_DATA_BYTES) {
+			var type = (SPEC.stringCheck(data, it)) ? Decode.string(data, it) : Decode.number(data, it);
 
-        } else if (code == Protocol.ROOM_STATE) {
-            this.setState(data.sub(it.offset, data.length - 1));
+			this.dispatchMessage(type, data.sub(it.offset, data.length - it.offset));
+		}
+	}
 
-        } else if (code == Protocol.ROOM_STATE_PATCH) {
-            this.patch(data.sub(it.offset, data.length - 1));
+	private function setState(encodedState:Bytes) {
+		this.serializer.setState(encodedState);
+		this.onStateChange.dispatch(this.serializer.getState());
+	}
 
-        } else if (code == Protocol.ROOM_DATA) {
-            var type = (SPEC.stringCheck(data, it))
-                ? Decode.string(data, it)
-                : Decode.number(data, it);
+	private function patch(binaryPatch:Bytes) {
+		this.serializer.patch(binaryPatch);
+		this.onStateChange.dispatch(this.serializer.getState());
+	}
 
-            var message = (data.length > it.offset)
-                ? MsgPack.decode(data.sub(it.offset, data.length - it.offset))
-                : null;
+	private function dispatchMessage(type:Dynamic, message:Dynamic) {
+		var messageType = this.getMessageHandlerKey(type);
 
-            this.dispatchMessage(type, message);
+		if (this.onMessageHandlers.get(messageType) != null) {
+			this.onMessageHandlers.get(messageType)(message);
 
-        } else if (code == Protocol.ROOM_DATA_BYTES) {
-            var type = (SPEC.stringCheck(data, it))
-                ? Decode.string(data, it)
-                : Decode.number(data, it);
+			// } else if (this.onMessageHandlers['*'] != null) {
+			//     this.onMessageHandlers.get(messageType)(type, message);
+		} else {
+			trace("onMessage not registered for type " + type);
+		}
+	}
 
-            this.dispatchMessage(type, data.sub(it.offset, data.length - it.offset));
-        }
-    }
-
-    private function setState(encodedState: Bytes) {
-        this.serializer.setState(encodedState);
-        this.onStateChange.dispatch(this.serializer.getState());
-    }
-
-    private function patch(binaryPatch: Bytes) {
-        this.serializer.patch(binaryPatch);
-        this.onStateChange.dispatch(this.serializer.getState());
-    }
-
-    private function dispatchMessage(type: Dynamic, message: Dynamic) {
-        var messageType = this.getMessageHandlerKey(type);
-
-        if (this.onMessageHandlers.get(messageType) != null) {
-            this.onMessageHandlers.get(messageType)(message);
-
-        // } else if (this.onMessageHandlers['*'] != null) {
-        //     this.onMessageHandlers.get(messageType)(type, message);
-
-        } else {
-            trace("onMessage not registered for type " + type);
-        }
-
-    }
-
-    private function getMessageHandlerKey(type: Dynamic): String {
-        if (Std.isOfType(type, String)) {
-            return type;
-
-        } else if (Std.isOfType(type, Int)) {
-            return "i" + type;
-
-        } else {
-            return "$" + Type.getClassName(Type.getClass(type));
-        }
-    }
+	private function getMessageHandlerKey(type:Dynamic):String {
+		if (Std.isOfType(type, String)) {
+			return type;
+		} else if (Std.isOfType(type, Int)) {
+			return "i" + type;
+		} else {
+			return "$" + Type.getClassName(Type.getClass(type));
+		}
+	}
 }

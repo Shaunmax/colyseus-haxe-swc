@@ -57,7 +57,6 @@ class OrderedMap<K, V> {
 
 
 @:keep
-@:generic
 class MapSchema<T> implements IMapSchema {
   public var __refId: Int = 0;
   public var _childType: Dynamic;
