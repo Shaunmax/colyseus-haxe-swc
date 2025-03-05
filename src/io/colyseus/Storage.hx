@@ -55,7 +55,6 @@ class Storage {
 		return inmemoryKV[name];
 	}
 
-<<<<<<< HEAD
 	private static function setData(name:String, value:String) {
 		inmemoryKV[name] = value;
 	}
@@ -65,46 +64,6 @@ class Storage {
 	}
 	#else
 	private static function getData(name:String) {
-=======
-	#elseif (flash)
-
-	// Private helper to get the SharedObject instance
-	private static function getSharedObject():SharedObject {
-		return SharedObject.getLocal(PATH);
-	}
-
-	private static function getData(name:String):String {
-		var so:SharedObject = getSharedObject();
-		// Check if the key exists in the SharedObject's data
-
-		if (Reflect.hasField(so.data, name)) {
-			return Reflect.getProperty(so.data, name);
-		}
-		return null;
-	}
-
-	private static function setData(name:String, value:String):Void {
-		var so:SharedObject = getSharedObject();
-		// Set the value for the given name (key)
-		Reflect.setProperty(so.data, name, value);
-		// Save the data to disk
-		so.flush();
-	}
-
-	private static function removeData(name:String):Void {
-		var so:SharedObject = getSharedObject();
-		// Remove the specific key if it exists
-		if (Reflect.hasField(so.data, name)) {
-			Reflect.deleteField(so.data, name);
-			so.flush(); // Persist the change
-		}
-	}
-
-    #else
-
-	private static function getData(name:String)
-	{
->>>>>>> upstream/master
 		var path = haxe.io.Path.normalize(PATH + "_" + name + ".cache");
 		if (sys.FileSystem.exists(path)) {
 			return sys.io.File.getContent(path);
